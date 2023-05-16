@@ -1,23 +1,27 @@
-import logo from './logo.svg';
-import './App.css';
+
+import "./App.css";
+
+import fetchUserContestRankingHistory from "./api/apiCall";
 
 function App() {
+  const name = "neal_wu"
+  const query = `query {
+    userContestRanking(username: "${name}") {
+      attendedContestsCount
+      rating
+      globalRanking
+    }
+  }`;
+  const callFunc = async () => {
+    fetchUserContestRankingHistory(query).then((data) => {
+      console.log(data);
+    });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    //write your code here for leaderboard component, if you want create a new file and then import here or do here itself
+    <div>
+      <button onClick={callFunc}>Click me</button>
     </div>
   );
 }
