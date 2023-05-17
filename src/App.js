@@ -2,14 +2,20 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 
 import fetchUserContestRankingHistory from "./api/apiCall";
-
+import Leaderboard from "./LeaderboardComponent";
+import Papa from 'papaparse';
 
 function App() {
-  const names = ["neal_wu", "nithin23k", "JOHNKRAM"]; // List of names
+ 
   const [rankingData, setRankingData] = useState([]);
   const [dataFetched, setDataFetched] = useState(false); // Flag to track data fetch status
 
+const names = ["neal_wu", "nithin23k", "JOHNKRAM"];
+
+
   const fetchData = async () => {
+    console.log("Calling me");
+
     const dataPromises = names.map((name) => {
       const query = `query {
         userContestRanking(username: "${name}") {
@@ -39,14 +45,20 @@ function App() {
   };
 
   useEffect(() => {
-    if (!dataFetched) {
-      fetchData(); // Fetch data only if it hasn't been fetched already
-    }
-  }, []); // Run the effect whenever the data fetch flag changes
+    fetchData(); // Fetch data on component mount
+
+    const interval = setInterval(fetchData, 30000); // Fetch data every 30 seconds
+
+    return () => {
+      clearInterval(interval); // Clean up the interval on component unmount
+    };
+  }, []);
 
   return (
     <div>
-      <button onClick={fetchData}>REFRESH</button>
+      <button onClick={fetchData}>
+        REFRESH
+      </button>
       {rankingData.map((data, index) => (
         <div key={index}>
           <p>Username: {data.name}</p>
@@ -54,10 +66,9 @@ function App() {
           <p>World Rank: {data.worldRank}</p>
         </div>
       ))}
-   
+      {dataFetched && <Leaderboard leaderboard={rankingData}></Leaderboard>}
     </div>
   );
 }
 
 export default App;
-
