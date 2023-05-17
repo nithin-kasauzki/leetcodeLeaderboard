@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import "./App.css";
-
-import fetchUserContestRankingHistory from "./api/apiCall";
+import { Button, Container, Typography } from "@material-ui/core";
+import { useTheme } from "@material-ui/core/styles";
+import { CloudUpload } from "@material-ui/icons";
 import Leaderboard from "./LeaderboardComponent";
 import Papa from "papaparse";
-import UsernamesComponent from "./csv/usernamesComp";
+
+import fetchUserContestRankingHistory from "./api/apiCall";
 
 function App() {
   const [rankingData, setRankingData] = useState([]);
@@ -13,6 +14,9 @@ function App() {
   const [data, setData] = useState([]);
   const [column, setColumn] = useState([]);
   const [Value, setValue] = useState([]);
+  const [fileUploaded, setFileUploaded] = useState(false); // Flag to track file upload status
+  const theme = useTheme();
+
   const fetchData = async () => {
     console.log("Calling me");
 
@@ -43,6 +47,7 @@ function App() {
     setDataFetched(true); // Set the data fetch flag to true
     console.log(formattedData);
   };
+
   const handleFileUpload = (event) => {
     Papa.parse(event.target.files[0], {
       header: true,
@@ -55,6 +60,7 @@ function App() {
         setData(result.data);
         setColumn(Object.keys(result.data[0]));
         setNames(ValueArray);
+        setFileUploaded(true); // Set the file upload flag to true
         console.log(result.data);
         console.log(ValueArray);
       },
@@ -64,20 +70,65 @@ function App() {
   useEffect(() => {
     fetchData(); // Fetch data on component mount
 
-    // const interval = setInterval(fetchData, 10000000); 
+    // const interval = setInterval(fetchData, 10000000);
 
     // return () => {
     //   clearInterval(interval); // Clean up the interval on component unmount
     // };
   }, []);
 
-  return (
-    <div>
-      <input type="file" onChange={handleFileUpload} />
-      <button onClick={fetchData}>REFRESH</button>
+  const containerStyle = {
+    textAlign: "center",
+    margin: "auto",
+    [theme.breakpoints.up("md")]: {
+      maxWidth: "80%", // Adjust the percentage for medium and larger screens
+    },
+    [theme.breakpoints.down("sm")]: {
+      maxWidth: "90%", // Adjust the percentage for small screens
+    },
+  };
 
+  const buttonStyle = {
+    marginTop: "20px",
+    marginBottom: "20px",
+    marginLeft: "10px",
+    backgroundColor: fileUploaded ? "green" : "inherit",
+    color: fileUploaded ? "white" : "inherit",
+  };
+
+  const fileInputStyle = {
+    display: "none",
+  };
+
+  return (
+    <Container style={containerStyle}>
+      <input
+        type="file"
+        onChange={handleFileUpload}
+        id="file-upload"
+        style={fileInputStyle}
+      />
+      <label htmlFor="file-upload">
+        <Button
+          variant="contained"
+          color="primary"
+          component="span"
+          startIcon={<CloudUpload />}
+          style={buttonStyle}
+        >
+          Upload CSV
+        </Button>
+      </label>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={fetchData}
+        style={buttonStyle}
+      >
+        Refresh
+      </Button>
       {dataFetched && <Leaderboard leaderboard={rankingData} />}
-    </div>
+    </Container>
   );
 }
 
