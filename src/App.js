@@ -22,6 +22,7 @@ function App() {
     //write your code here for leaderboard component, if you want create a new file and then import here or do here itself
     <div>
       <button onClick={callFunc}>Click me</button>
+      <button onClick={callFunc}>Click me</button>
     </div>
   );
 }
