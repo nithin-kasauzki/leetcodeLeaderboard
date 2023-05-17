@@ -32,8 +32,10 @@ function App() {
 
   return (
     <div>
+
       <h1>App Component</h1>
       <Leaderboard leaderboard={leaderboard} />
+
     </div>
   );
 }
