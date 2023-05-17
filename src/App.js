@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import Leaderboard from './Leaderboard';
-import fetchUserContestRankingHistory from './api/apiCall';
+import React, { useEffect, useState } from "react";
+import "./App.css";
+
+import fetchUserContestRankingHistory from "./api/apiCall";
+
 
 function App() {
-  const [leaderboard, setLeaderboard] = useState([]);
+  const names = ["neal_wu", "nithin23k", "JOHNKRAM"]; // List of names
+  const [rankingData, setRankingData] = useState([]);
+  const [dataFetched, setDataFetched] = useState(false); // Flag to track data fetch status
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const name = 'neal_wu';
+  const fetchData = async () => {
+    const dataPromises = names.map((name) => {
       const query = `query {
         userContestRanking(username: "${name}") {
           attendedContestsCount
@@ -16,28 +19,45 @@ function App() {
         }
       }`;
 
-      try {
-        const data = await fetchUserContestRankingHistory(query);
-        console.log(data); // Log the fetched data
+      return fetchUserContestRankingHistory(query);
+    });
 
-        // Set the leaderboard state with the fetched data
-        setLeaderboard(data.userContestRanking);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+    const results = await Promise.all(dataPromises);
 
-    fetchData();
-  }, []);
+    const formattedData = results.map((data, index) => ({
+      name: names[index],
+      rating: data.data.userContestRanking.rating,
+      worldRank: data.data.userContestRanking.globalRanking,
+    }));
+
+    // Sort the formattedData array based on rating in descending order
+    formattedData.sort((a, b) => b.rating - a.rating);
+
+    setRankingData(formattedData);
+    setDataFetched(true); // Set the data fetch flag to true
+    console.log(formattedData);
+  };
+
+  useEffect(() => {
+    if (!dataFetched) {
+      fetchData(); // Fetch data only if it hasn't been fetched already
+    }
+  }, []); // Run the effect whenever the data fetch flag changes
 
   return (
     <div>
-
-      <h1>App Component</h1>
-      <Leaderboard leaderboard={leaderboard} />
-
+      <button onClick={fetchData}>REFRESH</button>
+      {rankingData.map((data, index) => (
+        <div key={index}>
+          <p>Username: {data.name}</p>
+          <p>Rating: {data.rating}</p>
+          <p>World Rank: {data.worldRank}</p>
+        </div>
+      ))}
+   
     </div>
   );
 }
 
 export default App;
+
