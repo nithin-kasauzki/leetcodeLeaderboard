@@ -9,14 +9,12 @@ import fetchUserContestRankingHistory from "./api/apiCall";
 
 function App() {
   const [rankingData, setRankingData] = useState([]);
-  const [dataFetched, setDataFetched] = useState(false); // Flag to track data fetch status
+  const [dataFetched, setDataFetched] = useState(false); 
   const [names, setNames] = useState([]);
   const [data, setData] = useState([]);
   const [column, setColumn] = useState([]);
-  const [Value, setValue] = useState([]);
-  const [fileUploaded, setFileUploaded] = useState(false); // Flag to track file upload status
+  const [fileUploaded, setFileUploaded] = useState(false);
   const theme = useTheme();
-
   const fetchData = async () => {
     console.log("Calling me");
 
@@ -34,20 +32,29 @@ function App() {
 
     const results = await Promise.all(dataPromises);
 
-    const formattedData = results.map((data, index) => ({
-      name: names[index],
-      rating: data.data.userContestRanking.rating,
-      worldRank: data.data.userContestRanking.globalRanking,
-    }));
+    const formattedData = results.map((data, index) => {
+      const rating = data.data.userContestRanking?.rating || 0;
+      const worldRank = data.data.userContestRanking?.globalRanking || 0;
+    
+      return {
+        name: names[index],
+        rating: rating !== null ? parseFloat(rating).toFixed(0) : 0,
+        worldRank: worldRank !== null ? worldRank : 0,
+      };
+    });
+    
 
-    // Sort the formattedData array based on rating in descending order
+    
     formattedData.sort((a, b) => b.rating - a.rating);
 
     setRankingData(formattedData);
-    setDataFetched(true); // Set the data fetch flag to true
+    setDataFetched(true); 
     console.log(formattedData);
   };
-
+  
+  
+  
+  
   const handleFileUpload = (event) => {
     Papa.parse(event.target.files[0], {
       header: true,
@@ -60,7 +67,7 @@ function App() {
         setData(result.data);
         setColumn(Object.keys(result.data[0]));
         setNames(ValueArray);
-        setFileUploaded(true); // Set the file upload flag to true
+        setFileUploaded(true); 
         console.log(result.data);
         console.log(ValueArray);
       },
@@ -68,23 +75,18 @@ function App() {
   };
 
   useEffect(() => {
-    fetchData(); // Fetch data on component mount
+    fetchData(); 
 
-    // const interval = setInterval(fetchData, 10000000);
-
-    // return () => {
-    //   clearInterval(interval); // Clean up the interval on component unmount
-    // };
   }, []);
 
   const containerStyle = {
     textAlign: "center",
     margin: "auto",
     [theme.breakpoints.up("md")]: {
-      maxWidth: "80%", // Adjust the percentage for medium and larger screens
+      maxWidth: "80%", 
     },
     [theme.breakpoints.down("sm")]: {
-      maxWidth: "90%", // Adjust the percentage for small screens
+      maxWidth: "90%", 
     },
   };
 
